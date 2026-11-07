@@ -5,7 +5,7 @@
 [English](README.en.md) · [下载 0.1.0](https://github.com/1569y/html-export-preview/releases/tag/0.1.0)
 
 > 当前版本 **0.1.0** · 仅支持桌面端 · 需要 Obsidian **1.15.0** 或更高版本  
-> 目前**尚未收录进 Obsidian 官方社区插件目录**，请参考下文的「方式一：使用 BRAT 安装」或「方式二：手动安装」。
+> 目前**尚未收录进 Obsidian 官方社区插件目录**，请通过 [BRAT](#方式一使用-brat-安装) 或 [手动安装](#方式二手动安装) 安装。
 
 ![HTML Export Preview 的预览与导出界面：左侧预览笔记效果，右侧调整排版，下方选择导出格式和保存位置](docs/images/preview-editor.png)
 
