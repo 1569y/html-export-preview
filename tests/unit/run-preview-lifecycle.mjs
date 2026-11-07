@@ -96,6 +96,15 @@ class El {
 		if (!this.className) return
 		this.className = this.className.split(/\s+/).filter(c => c && c !== cls).join(' ')
 	}
+	/** Standard DOM API the sandboxed iframe document really exposes. */
+	get classList() {
+		const el = this
+		return {
+			add(cls) { el.addClass(cls) },
+			remove(cls) { el.removeClass(cls) },
+			contains(cls) { return String(el.className ?? '').split(/\s+/).includes(cls) }
+		}
+	}
 	/** Obsidian's `toggleClass(cls, value?)`; the location rows use it. */
 	toggleClass(cls, value) {
 		const has = this.className.split(/\s+/).includes(cls)
@@ -586,6 +595,51 @@ await check('18. 只输入不确认 / 关闭预览都不写盘，且位置控件
 	equal(view.locationInput, null, '输入框引用已释放')
 	equal(view.locationHintEl, null, '位置提示引用已释放')
 	equal(host.released, 1, '会话已归还插件')
+})
+
+await check('19. 选中高亮改用 CSS class（官方 ESLint Error 修复）', async () => {
+	const viewSrc = fs.readFileSync(path.join(root, 'src/view/preview-view.ts'), 'utf8')
+	assert(!/style\.setProperty\(\s*['"]outline/.test(viewSrc),
+		'不得再用 element.style.setProperty 写固定 outline')
+	assert(!/style\.removeProperty\(\s*['"]outline/.test(viewSrc),
+		'不得再用 removeProperty 清理 outline')
+	assert(/classList\.add\(['"]he-media-selected['"]\)/.test(viewSrc),
+		'选中态改用 CSS class')
+	assert(mod.PREVIEW_SELECTION_CSS.includes('.he-media-selected'),
+		'预览专用样式表提供 class 规则')
+	assert(/outline:\s*2px solid var\(--interactive-accent/.test(mod.PREVIEW_SELECTION_CSS),
+		'高亮颜色沿用交互强调色')
+	assert(/outline-offset:\s*3px/.test(mod.PREVIEW_SELECTION_CSS),
+		'保留 3px 外框偏移')
+
+	const contentEl = new El('div')
+	globalThis.__heContentEl = contentEl
+	const host = makeHost()
+	const view = new mod.PreviewView({}, host)
+	await view.onOpen()
+	view.setHtml(BIG_HTML)
+	const frame = iframes(contentEl)[0]
+	frame.contentDocument = fakeDocument()
+	view.setLayout({ zoom: 1.25 })
+	const style = frame.contentDocument.head.childNodes[0]
+	assert(style.textContent.includes('.he-media-selected'),
+		'选中规则随 live 样式表注入 iframe 文档')
+	assert(style.textContent.includes('zoom=1.25'),
+		'排版 CSS 仍完整写入，未被选中规则挤掉')
+
+	const block = new El('div')
+	block.setAttribute('data-he-media-id', 'mabc-0')
+	const styleWrites = []
+	block.style.setProperty = (...args) => styleWrites.push(args)
+	block.style.removeProperty = (...args) => styleWrites.push(args)
+	view.highlight(block)
+	equal(block.getAttribute('data-he-media-selected'), '1', '选中标记仍保留')
+	assert(block.classList.contains('he-media-selected'), '由 CSS class 表达选中')
+	equal(styleWrites.length, 0, '高亮不写任何内联样式')
+	view.clearHighlight(block)
+	equal(block.getAttribute('data-he-media-selected'), null, '清除选中标记')
+	assert(!block.classList.contains('he-media-selected'), '选中 class 已移除')
+	equal(styleWrites.length, 0, '取消选中也不写内联样式')
 })
 
 console.log(`\n${failures.length === 0 ? '✓' : '✗'} ${passed} 项通过${failures.length ? `，${failures.length} 项失败` : ''}`)

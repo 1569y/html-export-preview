@@ -315,6 +315,7 @@ await check('导出不会把“选中高亮”写进最终 HTML（选中只存�
 	const html = exporter.buildHtml(mediaSnapshot(), { mode: 'single', cssText: '' })
 	assert(!html.includes('data-he-media-selected'), '不含选中标记')
 	assert(!html.includes('outline-offset'), '不含选中边框样式')
+	assert(!html.includes('he-media-selected'), '不含预览编辑器专用的选中 class / 规则')
 	assert(
 		!/data-he-media-id="[^"]+"\][^{]*\{[^}]*outline/.test(html),
 		'单元素规则里不含 outline'

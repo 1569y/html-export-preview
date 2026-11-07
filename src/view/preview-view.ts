@@ -31,6 +31,26 @@ const MEDIA_PANEL_TITLE: Record<MediaSelection['kind'], string> = {
 	table: '表格设置'
 }
 
+/**
+ * Selection outline for the block being adjusted — editor-only presentation.
+ *
+ * The block lives in the iframe's own document, which does not load the
+ * plugin's `styles.css`, so the rule travels with the live stylesheet this
+ * view injects into that document. It is deliberately not part of
+ * `responsiveCss()` / `buildHtml()`: no exported HTML ever contains it.
+ *
+ * `!important` keeps the precedence the former inline `outline` had over
+ * theme rules and note-provided inline styles. The highlight is transient
+ * editing UI, never a change to the note or to the exported page.
+ */
+export const PREVIEW_SELECTION_CSS = `
+/* Preview editor only: the image / Mermaid / table currently selected. */
+.he-media-selected {
+	outline: 2px solid var(--interactive-accent, #4c8dff) !important;
+	outline-offset: 3px !important;
+}
+`
+
 export interface PreviewDocument {
 	/** Complete standalone page, exactly as `buildHtml` produced it. */
 	html: string
@@ -580,7 +600,9 @@ export class PreviewView extends ItemView {
 	 * A `<style>` element appended after the document's own stylesheet wins for
 	 * equal specificity, so the rules can simply be restated. Replacing its
 	 * `textContent` is the only DOM write a slider move performs — no capture,
-	 * no re-render, no reflow of the editing UI.
+	 * no re-render, no reflow of the editing UI. The editor-only selection
+	 * outline rides along in the same node; neither it nor the live layout CSS
+	 * is ever fed to `buildHtml`.
 	 */
 	private applyLiveCss(): void {
 		const doc = this.frame?.contentDocument
@@ -594,7 +616,7 @@ export class PreviewView extends ItemView {
 			parent?.appendChild(style)
 			this.liveStyle = style
 		}
-		style.textContent = css
+		style.textContent = `${css}\n${PREVIEW_SELECTION_CSS}`
 	}
 
 	/**
@@ -701,9 +723,10 @@ export class PreviewView extends ItemView {
 	 * either selects a `[data-he-media-id]` block, or clears the selection when
 	 * it lands on empty space. Same-note links are left to the anchor handler.
 	 *
-	 * Selection is *preview-only*: the highlight is an inline outline on the
-	 * live iframe node and is never part of `buildHtml`, so it cannot reach an
-	 * exported file.
+	 * Selection is *preview-only*: the highlight is a CSS class resolved by the
+	 * live iframe stylesheet (see `PREVIEW_SELECTION_CSS`) and is never part of
+	 * `buildHtml`, so it cannot reach an exported file. No inline style is
+	 * written on the rendered note.
 	 */
 	private installMediaSelection(): void {
 		const doc = this.frame?.contentDocument
@@ -823,17 +846,14 @@ export class PreviewView extends ItemView {
 
 	private highlight(block: HTMLElement): void {
 		block.setAttribute('data-he-media-selected', '1')
-		block.style.setProperty(
-			'outline',
-			'2px solid var(--interactive-accent, #4c8dff)'
-		)
-		block.style.setProperty('outline-offset', '3px')
+		// Standard DOM API: the iframe is sandboxed without `allow-scripts`, so
+		// Obsidian's `HTMLElement#addClass` extension is not available there.
+		block.classList.add('he-media-selected')
 	}
 
 	private clearHighlight(block: HTMLElement): void {
 		block.removeAttribute('data-he-media-selected')
-		block.style.removeProperty('outline')
-		block.style.removeProperty('outline-offset')
+		block.classList.remove('he-media-selected')
 	}
 
 	/** Drop the selection without touching the document (it may be gone). */
