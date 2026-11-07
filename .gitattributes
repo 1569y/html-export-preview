@@ -1,0 +1,9 @@
+# Pin line endings so release artifacts and source are stable across
+# platforms and match what CI (ubuntu-latest) builds from a clean checkout.
+*         text=auto eol=lf
+*.js      text eol=lf
+*.ts      text eol=lf
+*.json    text eol=lf
+*.css     text eol=lf
+*.md      text eol=lf
+*.yml     text eol=lf

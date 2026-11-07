@@ -4,6 +4,7 @@
 	"version": "0.1.0",
 	"minAppVersion": "1.5.0",
 	"description": "Export the current reading view as a standalone HTML file, preserving theme, snippets, media and sidenotes.",
-	"author": "local-dev",
+	"author": "1569y",
+	"authorUrl": "https://github.com/1569y",
 	"isDesktopOnly": true
 }

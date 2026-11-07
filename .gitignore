@@ -2,6 +2,7 @@ node_modules/
 .DS_Store
 *.log
 
-# generated test artifacts
+# generated test artifacts (incl. esbuild entry/bundle dumps like .r331-*)
 tests/unit/.tmp/
 tests/unit/.out-*/
+tests/unit/.*

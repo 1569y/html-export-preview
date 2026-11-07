@@ -303,25 +303,25 @@ export default class HtmlExportPlugin extends Plugin implements PreviewViewHost 
 
 		this.addCommand({
 			id: 'capture-and-export',
-			name: '打开 HTML 预览与排版编辑器',
+			name: 'Open HTML preview & layout editor',
 			callback: () => void this.openPreviewEditor()
 		})
 
 		this.addCommand({
 			id: 'open-preview',
-			name: '重新抓取并打开 HTML 预览',
+			name: 'Re-capture and open HTML preview',
 			callback: () => void this.openPreviewEditor(undefined, { refresh: true })
 		})
 
 		this.addCommand({
 			id: 'copy-last-export-path',
-			name: '复制上次导出的绝对路径',
+			name: 'Copy last export path',
 			callback: () => void this.copyLastPath()
 		})
 
 		this.addCommand({
 			id: 'share-single-file',
-			name: '分享为单个 HTML 文件（先预览再确认）',
+			name: 'Share as single HTML file (preview, then confirm)',
 			callback: () => void this.openPreviewEditor('share')
 		})
 
