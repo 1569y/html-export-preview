@@ -1,6 +1,6 @@
 # Release Notes — v0.1.0
 
-First public release candidate of **HTML Export Preview**.
+First public release.
 
 ## What's in this release
 
@@ -25,7 +25,7 @@ First public release candidate of **HTML Export Preview**.
 
 ## Known limitations
 
-- Desktop-only (`isDesktopOnly: true`); requires Obsidian 1.5.0+ (1.5.7+ recommended for full external-settings adoption).
+- Desktop-only (`isDesktopOnly: true`). Requires Obsidian 1.15.0 or later.
 - Export captures the rendered reading view, not raw markdown; some scripted/interactive embeds may not capture perfectly.
 - Real Obsidian UI acceptance (panel visibility, reveal-in-folder, overwrite dialog) was performed by the maintainer on their machine; the automated suites cover the underlying logic.
 
