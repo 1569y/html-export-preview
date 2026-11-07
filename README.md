@@ -51,7 +51,7 @@ You may write exports to **any directory your OS account can write**, including 
 When the export target already exists, the plugin asks explicitly:
 
 - **Cancel** — keeps the existing file untouched; nothing is written.
-- **Replace** — the plugin first re-checks the existing file's SHA-256, writes an exclusive backup of it, performs the final file swap as a single atomic rename, then re-verifies the result. The swap itself is atomic, but the surrounding checks, backup, and recovery are separate steps, so a failure can leave a `.he-backup-*.html` file on disk that you can safely delete. Your original file is never altered except by that atomic swap, and on any failure it stays intact (or is restored from the backup).
+- **Replace** — the plugin first re-checks the existing file's SHA-256, writes an exclusive backup of it, performs the final file swap as a single atomic rename, then re-verifies the result. The swap itself is atomic: your original file is never altered except by that rename. The backup and post-swap verification exist to detect a bad swap and restore the old file, but they are separate steps rather than one atomic transaction. If the operation is **interrupted abnormally** (for example a crash or power loss mid-swap), a `.he-backup-*.html` file may be left on disk and could require **manual recovery** — the plugin does not guarantee automatic recovery after an abnormal termination. On an ordinary (non-interrupted) failure the old file is preserved or restored automatically.
 - **Save-as** — writes a new file under a different name.
 
 No file is ever overwritten without this explicit confirmation.
@@ -67,7 +67,7 @@ This plugin is **desktop-only** and performs **no telemetry, analytics, advertis
 
 - **File system.** It reads the active note's media from your vault and writes exported HTML (and assets) to a directory **you choose**, which may be outside the vault. No files are read or written without an explicit user action.
 - **No telemetry or background traffic.** There is no telemetry, analytics, advertising, auto-update, or phone-home, and no periodic or background network activity of any kind.
-- **Network requests at export time (user-initiated).** To make an export self-contained, when your note's own CSS or fonts reference **remote `http(s)` URLs** (for example web-hosted fonts), the plugin `fetch`es exactly those URLs and inlines their contents. These requests are triggered by your export action and scoped to URLs already present in your note's styles — they are **not** sent to the plugin author, any analytics service, or any third party. An export that references such remote assets is therefore not produced "completely offline"; the fetches happen once, during that export.
+- **Network requests at export time (user-initiated).** To make an export self-contained, when your note's own CSS or fonts reference **remote `http(s)` URLs** (for example web-hosted fonts), the plugin `fetch`es exactly those URLs and inlines their contents. These requests are triggered by your export action and scoped to URLs already present in your note's styles. There is **no telemetry sent to the plugin author or any analytics service** — the plugin never reports your activity anywhere. Note, however, that the **third-party servers hosting those fonts/CSS do receive ordinary HTTP requests** (and the associated metadata such as your IP address, the requested URL, and a standard User-Agent). An export that references such remote assets is therefore not produced "completely offline"; the fetches happen once, during that export.
 - **Local secrets.** The integrity-signing key is a per-vault HMAC key derived and stored locally in the plugin's `data.json`. It is never transmitted and never leaves your machine.
 - **Electron.** On desktop it uses `electron.shell.showItemInFolder` solely to reveal the exported file in your file manager (toggleable in settings).
 
@@ -77,7 +77,7 @@ This plugin is **desktop-only** and performs **no telemetry, analytics, advertis
 - **Rendered view, not source.** Export reflects the reading view as Obsidian renders it; some dynamically scripted or externally-embedded interactive content may not capture perfectly.
 - **Remote assets need network at export time.** Notes referencing web-hosted fonts/CSS fetch them once during export (see [Privacy](#privacy--network-access)).
 - **Element tuning targets the export**, not the original note.
-- Requires Obsidian **1.5.7** or newer. The minimum is set to the version where the external-settings hook used for automatic config adoption is guaranteed; the plugin was not runtime-tested against a specific Obsidian version in its build environment, so the floor is set conservatively to the documented minimum.
+- Requires Obsidian **1.15.0** or newer. This floor reflects the version on which the plugin has actually been run and tested; earlier versions are not claimed as supported because they have not been verified.
 
 ## Plugin interface language
 
