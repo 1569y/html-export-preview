@@ -1,7 +1,7 @@
 {
 	"id": "html-export-preview",
 	"name": "HTML Export Preview",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"minAppVersion": "1.15.0",
 	"description": "Export the current reading view as a standalone HTML file, preserving theme, snippets, media and sidenotes.",
 	"author": "1569y",

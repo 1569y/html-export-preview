@@ -1,6 +1,6 @@
 {
 	"name": "html-export-preview",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Export the current Obsidian reading view as a standalone HTML file",
 	"main": "main.js",
 	"type": "module",
