@@ -1,0 +1,331 @@
+/* HTML Export Preview — plugin UI only.
+   Nothing in this file is exported; the generated page carries its own CSS. */
+
+/* ------------------------------------------------------------ editor shell -- */
+
+.he-preview-root {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding: 0;
+	overflow: hidden;
+}
+
+.he-preview-bar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	flex: 0 0 auto;
+}
+
+.he-preview-title {
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+	flex: 1 1 auto;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.he-preview-widths {
+	display: flex;
+	gap: 4px;
+}
+
+.he-preview-widths button,
+.he-preview-refresh {
+	font-size: var(--font-ui-smaller);
+	padding: 2px 8px;
+	height: auto;
+}
+
+/* page + settings panel. The panel lives *inside* this view: never in the
+   Obsidian sidebar, which is too narrow to show a page and its options. */
+.he-preview-body {
+	display: flex;
+	flex: 1 1 auto;
+	min-height: 0;
+	align-items: stretch;
+}
+
+.he-preview-holder {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: auto;
+	display: flex;
+	/* Do NOT centre with justify-content here: when the frame is wider than the
+	   holder, flex centring puts half of it off the left edge where a scrollbar
+	   can never reach. Auto margins on the frame centre it while there is spare
+	   room and fall back to 0 when there is not, so 桌面/平板 presets stay fully
+	   reachable by horizontal scrolling. */
+	justify-content: flex-start;
+	background: var(--background-secondary);
+	padding: 8px;
+}
+
+.he-preview-frame {
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+	/* Without this the width presets are a no-op: a flex item with the default
+	   flex-shrink:1 is squeezed straight back to the pane width, so clicking
+	   桌面 leaves the canvas at ~378px and the content column at ~298px. */
+	flex: 0 0 auto;
+	border: 0;
+	margin: 0 auto;
+	background: var(--background-primary);
+	box-shadow: 0 0 0 1px var(--background-modifier-border);
+}
+
+.he-preview-panel {
+	flex: 0 0 232px;
+	min-width: 200px;
+	overflow-y: auto;
+	padding: 10px 12px 16px;
+	border-left: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+}
+
+/* ------------------------------------------------------------- panel parts -- */
+
+.he-panel-section {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	text-transform: none;
+	letter-spacing: 0;
+	margin: 14px 0 4px;
+}
+
+.he-panel-section:first-child {
+	margin-top: 0;
+}
+
+.he-panel-select {
+	width: 100%;
+}
+
+.he-panel-color {
+	width: 100%;
+	height: 28px;
+	margin-top: 6px;
+	padding: 0;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	background: none;
+}
+
+.he-panel-number {
+	width: 100%;
+	margin-top: 6px;
+}
+
+.he-panel-range {
+	width: 100%;
+}
+
+.he-panel-value {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-normal);
+	font-variant-numeric: tabular-nums;
+}
+
+.he-panel-chips {
+	display: flex;
+	gap: 4px;
+	margin-top: 6px;
+}
+
+.he-chip {
+	font-size: var(--font-ui-smaller);
+	padding: 1px 8px;
+	height: auto;
+}
+
+.he-panel-reset {
+	width: 100%;
+	margin-top: 18px;
+	font-size: var(--font-ui-smaller);
+}
+
+.he-panel-hint {
+	font-size: var(--font-ui-smaller);
+	line-height: 1.45;
+	color: var(--text-faint);
+	margin: 6px 0 2px;
+}
+
+/* ------------------------------------------------------------ export bar -- */
+
+.he-preview-foot {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 10px;
+	border-top: 1px solid var(--background-modifier-border);
+	flex: 0 0 auto;
+}
+
+.he-preview-format {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.he-preview-hint {
+	flex: 1 1 auto;
+	font-size: var(--font-ui-smaller);
+	color: var(--text-faint);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.he-preview-foot button.mod-cta {
+	flex: 0 0 auto;
+}
+
+/* Task 2: export location picker wraps onto its own full-width row. */
+.he-preview-foot {
+	flex-wrap: wrap;
+}
+
+.he-preview-loc {
+	flex: 1 1 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding-top: 6px;
+	border-top: 1px dashed var(--background-modifier-border);
+}
+
+.he-location-input {
+	width: 100%;
+}
+
+.he-location-input.he-invalid {
+	border-color: var(--background-modifier-error, #e6554f);
+	box-shadow: 0 0 0 1px var(--background-modifier-error, #e6554f);
+}
+
+.he-preview-loc-hint {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-faint);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.he-loc-reset {
+	align-self: flex-start;
+	font-size: var(--font-ui-smaller);
+	margin-top: 2px;
+	padding: 1px 10px;
+	height: auto;
+}
+
+/* Task 3: the destination switch and the two mutually exclusive rows.
+   The external path is read-only text — a path outside the vault can only come
+   from the system dialog, so there is deliberately no input to type into. */
+.he-loc-mode {
+	width: 100%;
+}
+
+.he-loc-row {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.he-loc-path {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	line-height: 1.4;
+	padding: 4px 6px;
+	border-radius: var(--radius-s);
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	word-break: break-all;
+	max-height: 4.2em;
+	overflow: auto;
+	user-select: text;
+}
+
+.he-loc-path.he-loc-empty {
+	color: var(--text-faint);
+	font-style: italic;
+	font-family: var(--font-interface);
+}
+
+.he-loc-browse {
+	align-self: flex-start;
+	font-size: var(--font-ui-smaller);
+	padding: 1px 10px;
+	height: auto;
+}
+
+/* -------------------------------------------------- per-element (P2) panel -- */
+
+/* The element panel replaces the global one while a block is selected; both
+   live in the same scroll container so the panel never changes width.
+   Visibility is owned *exclusively* by LayoutPanel.syncMedia() setting an
+   inline display. A `display:none` rule here would win as soon as that code
+   cleared the inline style, which is exactly why the element panel used to be
+   invisible even though the selection itself worked. Do not add one back. */
+
+.he-media-title {
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-semibold);
+	color: var(--text-normal);
+	margin: 0 0 10px;
+}
+
+.he-media-ratio {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	margin: 10px 0 0;
+}
+
+.he-media-ratio input {
+	margin: 0;
+}
+
+.he-media-reset,
+.he-media-back {
+	width: 100%;
+	margin-top: 10px;
+	font-size: var(--font-ui-smaller);
+}
+
+.he-media-back {
+	margin-top: 6px;
+}
+
+
+/* ------------------------------------------- target-conflict modal ---- */
+
+.he-conflict-heading {
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-semibold);
+	margin: 0 0 8px;
+}
+
+.he-conflict-path {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 6px 8px;
+	margin: 0 0 10px;
+	word-break: break-all;
+	max-height: 5em;
+	overflow: auto;
+	user-select: text;
+}

@@ -1,0 +1,43 @@
+{
+	"name": "html-export-preview",
+	"version": "0.1.0",
+	"description": "Export the current Obsidian reading view as a standalone HTML file",
+	"main": "main.js",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "node esbuild.config.mjs production",
+		"typecheck": "tsc -noEmit -skipLibCheck",
+		"test:unit": "node tests/unit/run-unit.mjs",
+		"test:round2": "node tests/unit/run-round2.mjs",
+		"test:round2a": "node tests/unit/run-round2a.mjs",
+		"test:round2a1": "node tests/unit/run-round2a1.mjs",
+		"test:round2a2": "node tests/unit/run-round2a2.mjs",
+		"test:round2a2-1": "node tests/unit/run-round2a2-1.mjs",
+		"test:round2a2-2": "node tests/unit/run-round2a2-2.mjs",
+		"test:capture": "node tests/e2e/verify-capture.mjs",
+		"test:layout": "node tests/e2e/verify-layout.mjs",
+		"test": "node tests/unit/run-unit.mjs && node tests/unit/run-round2.mjs && node tests/unit/run-round2a.mjs && node tests/unit/run-round2a1.mjs && node tests/unit/run-round2a2.mjs && node tests/unit/run-round2a2-1.mjs && node tests/unit/run-round2a2-2.mjs && node tests/unit/run-theme-fidelity.mjs && node tests/unit/run-p0-completeness.mjs && node tests/unit/run-p0-host-release.mjs && node tests/unit/run-p1-sidenotes.mjs && node tests/unit/run-p1b-layout.mjs && node tests/unit/run-preview-lifecycle.mjs && node tests/unit/run-share-single.mjs && node tests/unit/run-share-safe.mjs && node tests/unit/run-share-startup.mjs && node tests/unit/run-p2-layout.mjs && node tests/unit/run-round3-3-1-blank.mjs && node tests/unit/run-p2-same-note.mjs && node tests/unit/run-p2-media.mjs && node tests/unit/run-p3-external.mjs",
+		"test:p1b": "node tests/unit/run-p1b-layout.mjs",
+		"test:lifecycle": "node tests/unit/run-preview-lifecycle.mjs",
+		"test:share": "node tests/unit/run-share-single.mjs",
+		"test:p0": "node tests/unit/run-p0-completeness.mjs && node tests/unit/run-p0-host-release.mjs",
+		"test:browser": "node tests/e2e/verify-capture.mjs && node tests/e2e/verify-layout.mjs",
+		"test:theme": "node tests/unit/run-theme-fidelity.mjs",
+		"test:share-safe": "node tests/unit/run-share-safe.mjs",
+		"test:share-startup": "node tests/unit/run-share-startup.mjs",
+		"test:p2": "node tests/unit/run-p2-layout.mjs && node tests/unit/run-preview-lifecycle.mjs",
+		"test:p2-same-note": "node tests/unit/run-p2-same-note.mjs",
+		"test:p2-media": "node tests/unit/run-p2-media.mjs",
+		"test:p3-external": "node tests/unit/run-p3-external.mjs"
+	},
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^16.11.6",
+		"esbuild": "0.25.5",
+		"obsidian": "^1.13.1",
+		"tslib": "2.4.0",
+		"typescript": "^5.8.3"
+	}
+}
