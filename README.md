@@ -18,18 +18,19 @@ Unlike "export markdown as HTML" tools, this plugin captures what you actually s
 - **Export anywhere.** Write to any directory your OS account can write — including outside the vault.
 - **Safe overwrite.** When the target exists, you get an explicit **Replace / Save-as / Cancel** choice; cancel never touches the old file, and replace only affects the exact file you confirmed.
 - **Locate after export.** On desktop, the output is revealed in the system file manager (toggle in settings).
-- **Local integrity signing.** A per-vault HMAC manifest is written alongside exports so you can verify they were produced by this vault (no network involved).
+- **Local integrity signing (folder export).** The **asset-bundle / folder export** writes a sidecar `export-manifest.json` carrying a per-file SHA-256 and an HMAC-SHA256 signature under a per-vault key, so you can verify a folder was produced by this vault. The single-file export is self-contained and does **not** include this manifest.
 
 ## Opening the preview
 
-1. Open a note in **reading view**.
+1. Open a note in **reading view or edit view** — both work. From edit mode the plugin briefly switches the note to reading view to capture, then restores your original mode.
 2. Run the command **HTML Export Preview: Open HTML preview & layout editor** from the command palette, or click the ribbon icon.
    - A second command, **Re-capture and open HTML preview**, forces a fresh capture of the current note.
-3. Review the preview with the responsive presets. Nothing is written to disk until you confirm an export.
+3. In the preview, **click an image, a Mermaid diagram, or a table** to select it; its width and alignment become editable in the right-hand panel.
+4. Review the preview with the responsive presets. Nothing is written to disk until you confirm an export.
 
 ## Adjusting images, Mermaid diagrams & tables
 
-- In the right-hand panel, click an **image**, a **Mermaid diagram**, or a **table** to select it, then set its **width** (original / percent / px) and **alignment** (left / center / right), or reset to defaults.
+- Select an element by **clicking it in the preview** — an **image**, a **Mermaid diagram**, or a **table**. The right-hand panel then shows its **width** (original / percent / px) and **alignment** (left / center / right) controls, plus a reset-to-defaults option.
 - These adjustments apply to the **export only** — your original note is never modified.
 - Blocks you have not individually tuned follow the panel's global defaults.
 
@@ -50,7 +51,7 @@ You may write exports to **any directory your OS account can write**, including 
 When the export target already exists, the plugin asks explicitly:
 
 - **Cancel** — keeps the existing file untouched; nothing is written.
-- **Replace** — swaps only the exact file you confirmed, via an atomic rename with a backup-recovery fallback.
+- **Replace** — the plugin first re-checks the existing file's SHA-256, writes an exclusive backup of it, performs the final file swap as a single atomic rename, then re-verifies the result. The swap itself is atomic, but the surrounding checks, backup, and recovery are separate steps, so a failure can leave a `.he-backup-*.html` file on disk that you can safely delete. Your original file is never altered except by that atomic swap, and on any failure it stays intact (or is restored from the backup).
 - **Save-as** — writes a new file under a different name.
 
 No file is ever overwritten without this explicit confirmation.
@@ -62,10 +63,11 @@ No file is ever overwritten without this explicit confirmation.
 
 ## Privacy & network access
 
-This plugin is **desktop-only** and performs **no telemetry, analytics, advertising, auto-update, or phone-home** behavior.
+This plugin is **desktop-only** and performs **no telemetry, analytics, advertising, auto-update, or phone-home** behavior. It makes **no network requests unless you export** a note that references remote resources.
 
 - **File system.** It reads the active note's media from your vault and writes exported HTML (and assets) to a directory **you choose**, which may be outside the vault. No files are read or written without an explicit user action.
-- **Network (at export time only).** To make an export truly offline/self-contained, the plugin `fetch`es **remote `http(s)` URLs that appear in the note's own CSS or fonts** (for example web-hosted fonts) and inlines them into the file. It never contacts the plugin author, an analytics service, or any third party, and there is no background network activity. Because of this, an export is **not** "completely offline" at the moment it references remote assets — the fetch happens once, during export, and only for URLs already present in your own note's styles.
+- **No telemetry or background traffic.** There is no telemetry, analytics, advertising, auto-update, or phone-home, and no periodic or background network activity of any kind.
+- **Network requests at export time (user-initiated).** To make an export self-contained, when your note's own CSS or fonts reference **remote `http(s)` URLs** (for example web-hosted fonts), the plugin `fetch`es exactly those URLs and inlines their contents. These requests are triggered by your export action and scoped to URLs already present in your note's styles — they are **not** sent to the plugin author, any analytics service, or any third party. An export that references such remote assets is therefore not produced "completely offline"; the fetches happen once, during that export.
 - **Local secrets.** The integrity-signing key is a per-vault HMAC key derived and stored locally in the plugin's `data.json`. It is never transmitted and never leaves your machine.
 - **Electron.** On desktop it uses `electron.shell.showItemInFolder` solely to reveal the exported file in your file manager (toggleable in settings).
 
@@ -75,7 +77,11 @@ This plugin is **desktop-only** and performs **no telemetry, analytics, advertis
 - **Rendered view, not source.** Export reflects the reading view as Obsidian renders it; some dynamically scripted or externally-embedded interactive content may not capture perfectly.
 - **Remote assets need network at export time.** Notes referencing web-hosted fonts/CSS fetch them once during export (see [Privacy](#privacy--network-access)).
 - **Element tuning targets the export**, not the original note.
-- Requires Obsidian **1.5.0** or newer. (External-settings auto-adoption is fully realized on 1.5.7+, but the plugin runs from 1.5.0.)
+- Requires Obsidian **1.5.7** or newer. The minimum is set to the version where the external-settings hook used for automatic config adoption is guaranteed; the plugin was not runtime-tested against a specific Obsidian version in its build environment, so the floor is set conservatively to the documented minimum.
+
+## Plugin interface language
+
+This README is in English, but the plugin's **in-app interface** — the settings tab, the overwrite-confirmation dialog, and the layout/tuning panel — is currently written in **Chinese**. For this first release only the command names and this documentation have been localized to English; localizing the in-app UI is planned but not yet done. Do not be surprised to see Chinese text inside the plugin.
 
 ## Installation
 
@@ -93,10 +99,6 @@ Search **HTML Export Preview** in *Settings → Community plugins* and enable it
 
 - **Bug reports & feature requests:** open an issue at <https://github.com/1569y/html-export-preview/issues>.
 - Please include your Obsidian version, the plugin version (`0.1.0`), and the steps to reproduce.
-
-## Screenshots
-
-> Add public demo screenshots here (preview editor, layout panel, export dialog). Use only demo content that contains no real vault data or personal paths.
 
 ## Development
 
