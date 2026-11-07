@@ -1,116 +1,100 @@
 # HTML Export Preview
 
-Export the current Obsidian **reading view** (the already-rendered page) as a standalone HTML file you can open anywhere — then tune images, Mermaid diagrams, and tables on the exported copy **before** saving.
+**把 Obsidian 里排好版的笔记，导出成一个可以单独打开、保存和分享的 HTML 网页。**
 
-Unlike "export markdown as HTML" tools, this plugin captures what you actually see: the active theme, your CSS snippets, media, and Side Notes, all resolved into a self-contained file.
+[English](README.en.md) · [下载 0.1.0](https://github.com/1569y/html-export-preview/releases/tag/0.1.0)
 
-> Status: **v0.1.0** — first public release. Desktop-only (see [Limitations](#limitations)).
+> 当前版本 **0.1.0** · 仅支持桌面端 · 需要 Obsidian **1.15.0** 或更高版本  
+> 目前**尚未收录进 Obsidian 官方社区插件目录**，请参考下文的「方式一：使用 BRAT 安装」或「方式二：手动安装」。
 
-## Features
+![HTML Export Preview 的预览与导出界面：左侧预览笔记效果，右侧调整排版，下方选择导出格式和保存位置](docs/images/preview-editor.png)
 
-- **Preview before you write.** A built-in editor shows the rendered page with responsive presets (Desktop / Tablet / Phone / Fluid) so you confirm the result before any file is written.
-- **Standalone HTML.** Export the current note as a single self-contained `.html` file (images, fonts, and styles inlined) that opens offline in any browser.
-- **Asset-bundle export.** Alternatively export a folder with an `assets/` directory, keeping media external (handy for large media or for hosting the folder).
-- **Theme & snippets preserved.** The active theme and your CSS snippets are collected so the export looks like your vault.
-- **Side Notes aware.** Margin / side-note content is laid out into the exported page.
-- **Single-element tuning.** Select an image, a Mermaid diagram, or a **table** in the right-hand panel and adjust width (original / percent / px) and alignment (left / center / right), or reset to defaults. Changes apply to the export, not your note.
-- **Same-article anchors.** In-page `#heading` links jump inside the preview/export instead of opening a new tab.
-- **Export anywhere.** Write to any directory your OS account can write — including outside the vault.
-- **Safe overwrite.** When the target exists, you get an explicit **Replace / Save-as / Cancel** choice; cancel never touches the old file, and replace only affects the exact file you confirmed.
-- **Locate after export.** On desktop, the output is revealed in the system file manager (toggle in settings).
-- **Local integrity signing (folder export).** The **asset-bundle / folder export** writes a sidecar `export-manifest.json` carrying a per-file SHA-256 and an HMAC-SHA256 signature under a per-vault key, so you can verify a folder was produced by this vault. The single-file export is self-contained and does **not** include this manifest.
+*图示为真实的 Obsidian 桌面端界面：在同一个窗口里检查导出效果、切换屏幕宽度、调整排版，并选择导出方式。*
 
-## Opening the preview
+## 主要功能与优势
 
-1. Open a note in **reading view or edit view** — both work. From edit mode the plugin briefly switches the note to reading view to capture, then restores your original mode.
-2. Run the command **HTML Export Preview: Open HTML preview & layout editor** from the command palette, or click the ribbon icon.
-   - A second command, **Re-capture and open HTML preview**, forces a fresh capture of the current note.
-3. In the preview, **click an image, a Mermaid diagram, or a table** to select it; its width and alignment become editable in the right-hand panel.
-4. Review the preview with the responsive presets. Nothing is written to disk until you confirm an export.
+- **保留原来的笔记样式**：从 Obsidian 已经渲染好的阅读视图生成 HTML，尽量保留当前主题、CSS 片段、图片、高亮、Mermaid 图表和 Side Notes。
+- **导出前先看效果**：内置预览编辑器，可切换桌面、平板、手机和自适应宽度，确认排版后再写文件。
+- **单独调整元素**：点击图片、Mermaid 图表或表格，调整宽度与对齐；也可以统一设置背景、内容宽度和显示比例。
+- **两种导出方式**：单文件 HTML，或带 `assets/` 目录的资源包。
+- **不改原始笔记**：所有排版调整只作用于导出的副本，不会回写 Obsidian 笔记。
+- **保存位置可选**：可以保存到 Vault 内，也可以通过桌面文件选择器保存到 Vault 外的指定位置。
 
-## Adjusting images, Mermaid diagrams & tables
+### 保留的是渲染结果，不是 Markdown 源码
 
-- Select an element by **clicking it in the preview** — an **image**, a **Mermaid diagram**, or a **table**. The right-hand panel then shows its **width** (original / percent / px) and **alignment** (left / center / right) controls, plus a reset-to-defaults option.
-- These adjustments apply to the **export only** — your original note is never modified.
-- Blocks you have not individually tuned follow the panel's global defaults.
+常见的「Markdown 转 HTML」只保留文字结构，主题配色、CSS 片段和笔记里各种插件渲染出来的效果容易丢失。本插件抓取的是 Obsidian 已经渲染完成的阅读视图，因此导出的网页更接近你实际看到的样子。不同主题和第三方插件的渲染方式存在差异，最终效果请以预览结果为准。
 
-## Single-file export
+### 导出前预览，减少反复试错
 
-Export the current note as one self-contained `.html` file. Images, fonts, and styles are inlined so the file opens offline in any browser with no sibling files.
+预览编辑器可以切换不同屏幕宽度，检查文字、图片和图表在窄屏下的排布。在点击确认导出之前，插件不会写出任何文件，也不会改动原笔记。
 
-## Asset-bundle export
+### 点选元素单独调整
 
-Export a folder that contains an `index.html` plus an `assets/` directory holding the media externally. Choose this when you prefer to keep large media out of the HTML, or when you want to publish/host the folder as a unit.
+在预览画面里点击**图片、Mermaid 图表或表格**，右侧面板即可调整它的宽度（原样 / 百分比 / 像素）和对齐方式（左 / 中 / 右），并可恢复默认。未单独调整的元素跟随全局设置。页面背景、正文宽度、整体对齐和缩放也可以统一设置。
 
-## Directories outside the vault
+### 两种导出方式
 
-You may write exports to **any directory your OS account can write**, including locations outside the vault. The default export folder lives inside the vault (recommended, because Obsidian indexes it and plugin updates won't overwrite it), but you can point the export path anywhere.
+| 导出方式 | 得到什么 | 适合什么时候用 |
+| --- | --- | --- |
+| **单文件 HTML** | 一个 `.html` 文件，图片与所需样式尽量内联 | 分享单篇笔记、归档、在浏览器中直接打开 |
+| **资源包导出** | `index.html` 加上独立的 `assets/` 资源目录 | 图片较多、希望单独管理资源，或部署为静态页面 |
 
-## Overwrite confirmation
+### 保存位置与覆盖确认
 
-When the export target already exists, the plugin asks explicitly:
+导出位置可以选 Vault 内目录，也可以通过桌面文件选择器指定 Vault 外的目录。如果目标文件已经存在，插件会提供**覆盖 / 另存为 / 取消**三种选择；取消不会改动原有文件。导出成功后，可在系统文件管理器中定位结果。
 
-- **Cancel** — keeps the existing file untouched; nothing is written.
-- **Replace** — the plugin first re-checks the existing file's SHA-256, writes an exclusive backup of it, performs the final file swap as a single atomic rename, then re-verifies the result. The swap itself is atomic: your original file is never altered except by that rename. The backup and post-swap verification exist to detect a bad swap and restore the old file, but they are separate steps rather than one atomic transaction. If the operation is **interrupted abnormally** (for example a crash or power loss mid-swap), a `.he-backup-*.html` file may be left on disk and could require **manual recovery** — the plugin does not guarantee automatic recovery after an abnormal termination. On an ordinary (non-interrupted) failure the old file is preserved or restored automatically.
-- **Save-as** — writes a new file under a different name.
+## 安装方法
 
-No file is ever overwritten without this explicit confirmation.
+**目前尚未上架 Obsidian 官方社区插件目录**，暂时无法在「设置 → 社区插件」中搜索到本插件。请使用下面两种方式之一。
 
-## Anchors: same-article supported, cross-note not guaranteed
+### 方式一：使用 BRAT 安装
 
-- **Same-article anchors work.** In-page `#heading` links jump within the preview/export instead of opening a new browser tab.
-- **Cross-note / wiki-link navigation is NOT guaranteed.** Links to other notes generally do not resolve in a standalone export and may not work offline. If you rely on in-file navigation, keep the related content within the same note.
+1. 在 Obsidian 的社区插件中安装并启用 **BRAT**。
+2. 打开 BRAT 的 **Add a beta plugin**。
+3. 填入仓库地址：`https://github.com/1569y/html-export-preview`。
+4. 安装完成后，在 **设置 → 社区插件** 中启用 **HTML Export Preview**。
 
-## Privacy & network access
+### 方式二：手动安装
 
-This plugin is **desktop-only** and performs **no telemetry, analytics, advertising, auto-update, or phone-home** behavior. It makes **no network requests unless you export** a note that references remote resources.
+1. 打开 [0.1.0 Release](https://github.com/1569y/html-export-preview/releases/tag/0.1.0)，下载 `main.js`、`manifest.json`、`styles.css` 三个文件。
+2. 在你的 Vault 中创建目录 `.obsidian/plugins/html-export-preview/`。
+3. 把这三个文件放进该目录。
+4. 重新加载 Obsidian，进入 **设置 → 社区插件**，启用 **HTML Export Preview**。
 
-- **File system.** It reads the active note's media from your vault and writes exported HTML (and assets) to a directory **you choose**, which may be outside the vault. No files are read or written without an explicit user action.
-- **No telemetry or background traffic.** There is no telemetry, analytics, advertising, auto-update, or phone-home, and no periodic or background network activity of any kind.
-- **Network requests at export time (user-initiated).** To make an export self-contained, when your note's own CSS or fonts reference **remote `http(s)` URLs** (for example web-hosted fonts), the plugin `fetch`es exactly those URLs and inlines their contents. These requests are triggered by your export action and scoped to URLs already present in your note's styles. There is **no telemetry sent to the plugin author or any analytics service** — the plugin never reports your activity anywhere. Note, however, that the **third-party servers hosting those fonts/CSS do receive ordinary HTTP requests** (and the associated metadata such as your IP address, the requested URL, and a standard User-Agent). An export that references such remote assets is therefore not produced "completely offline"; the fetches happen once, during that export.
-- **Local secrets.** The integrity-signing key is a per-vault HMAC key derived and stored locally in the plugin's `data.json`. It is never transmitted and never leaves your machine.
-- **Electron.** On desktop it uses `electron.shell.showItemInFolder` solely to reveal the exported file in your file manager (toggleable in settings).
+> 升级时同样替换 `main.js` 和 `styles.css` 即可，`data.json` 中保存的是本机设置，请保留。
 
-## Limitations
+## 基础使用教程
 
-- **Desktop only.** Relies on Node `fs` and Electron; will not run on mobile (declared `isDesktopOnly`).
-- **Rendered view, not source.** Export reflects the reading view as Obsidian renders it; some dynamically scripted or externally-embedded interactive content may not capture perfectly.
-- **Remote assets need network at export time.** Notes referencing web-hosted fonts/CSS fetch them once during export (see [Privacy](#privacy--network-access)).
-- **Element tuning targets the export**, not the original note.
-- Requires Obsidian **1.15.0** or newer. This floor reflects the version on which the plugin has actually been run and tested; earlier versions are not claimed as supported because they have not been verified.
+1. **打开笔记**：在 Obsidian 中打开要导出的单篇笔记，阅读模式或编辑模式都可以（从编辑模式进入时，插件会临时切换到阅读视图完成抓取，再恢复原来的模式）。
+2. **打开预览**：通过命令面板运行 **HTML Export Preview: Open HTML preview & layout editor**，或点击侧边栏的插件图标。
+3. **检查并调整**：切换设备宽度查看排版；点击图片、Mermaid 图表或表格，在右侧调整宽度和对齐。
+4. **确认导出**：选择单文件 HTML 或资源包，设置保存位置，点击确认导出。之后在浏览器中打开结果检查最终效果。
 
-## Plugin interface language
+## 已知限制与隐私说明
 
-This README is in English, but the plugin's **in-app interface** — the settings tab, the overwrite-confirmation dialog, and the layout/tuning panel — is currently written in **Chinese**. For this first release only the command names and this documentation have been localized to English; localizing the in-app UI is planned but not yet done. Do not be surprised to see Chinese text inside the plugin.
+- **仅支持桌面端**：依赖 Node 文件系统与 Electron 能力，不支持 Obsidian 移动端（`isDesktopOnly: true`）。需要 Obsidian **1.15.0** 或更高版本。
+- **导出的是渲染视图**：依赖脚本或外部嵌入的互动内容，不一定能与 Obsidian 内显示得完全一致。
+- **跨笔记链接不保证可用**：支持同一篇 HTML 内部的标题锚点跳转；指向其他笔记的链接在独立 HTML 中通常无法解析，离线打开时可能失效。需要页内跳转的内容请放在同一篇笔记里。
+- **远程资源需要联网**：如果笔记的样式引用了远程 CSS 或字体，导出时插件会尝试获取并内联这些资源。此时会向托管这些资源的第三方服务器发出正常网络请求，对方可能获得 IP、请求地址等常规网络元数据；若资源获取失败，导出结果可能与预览有差异。
+- **不会回写原笔记**：排版调整只影响导出的副本。
+- **插件界面目前主要为中文**：设置页、覆盖确认框和排版面板使用中文显示。
+- **隐私**：插件没有遥测、使用统计、广告、自动更新或回传行为，不会向作者发送笔记内容。文件夹导出会额外写入用于本地完整性检查的 `export-manifest.json`（单文件 HTML 不带此清单）；签名密钥保存在本机 `data.json` 中，不会外传。
 
-## Installation
+## 开发者信息
 
-### Option A — Obsidian community plugin (once approved)
-
-Search **HTML Export Preview** in *Settings → Community plugins* and enable it.
-
-### Option B — BRAT (beta)
-
-1. Install the **BRAT** plugin.
-2. *BRAT → Add a beta plugin* and paste the repository URL `https://github.com/1569y/html-export-preview`.
-3. Enable **HTML Export Preview** in *Community plugins*.
-
-## Feedback
-
-- **Bug reports & feature requests:** open an issue at <https://github.com/1569y/html-export-preview/issues>.
-- Please include your Obsidian version, the plugin version (`0.1.0`), and the steps to reproduce.
-
-## Development
+本项目使用 TypeScript 与 esbuild 构建。`main.js` 是构建生成的插件入口，正式发行版请从 [Releases](https://github.com/1569y/html-export-preview/releases/tag/0.1.0) 获取。从源码验证或参与开发可以运行：
 
 ```bash
-npm install
+npm ci
 npm run typecheck   # tsc -noEmit -skipLibCheck
-npm run build       # esbuild production bundle -> main.js
-npm test            # unit suites (run under Node, no Obsidian required)
+npm test            # Node 下离线运行的单元测试
+npm run build       # esbuild 生产构建，输出 main.js
 ```
 
-End-to-end UI verification requires a real Obsidian desktop instance and is performed manually / via the `tests/e2e` harness on the developer's machine.
+端到端界面验收需要真实的 Obsidian 桌面端，由维护者在本地手动完成，公开仓库中的单元测试不包含这部分。
 
-## License
+发现问题或有建议，欢迎在 [GitHub Issues](https://github.com/1569y/html-export-preview/issues) 反馈。建议附上 Obsidian 版本、插件版本和复现步骤，截图请不要包含私人笔记内容。
 
-MIT — see [LICENSE](./LICENSE).
+## 许可证
+
+[MIT License](LICENSE) · 作者 [1569y](https://github.com/1569y)
