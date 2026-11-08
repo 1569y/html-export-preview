@@ -2,6 +2,10 @@ import type { CaptureSnapshot } from '../capture/types'
 import type { AssetCollector } from '../assets/resource-manager'
 import { responsiveCss, themeOf } from './layout-css'
 import { normalizeLayout, type ExportLayoutOptions } from './layout-settings'
+import {
+	assertEmbeddableCss,
+	neutralizeStyleEndTags
+} from '../css/style-boundary'
 import { parseSrcset, serializeSrcset, type SrcsetCandidate } from './srcset'
 import { applyInternalAnchors } from './anchors'
 import { assignMediaIds } from './media-identity'
@@ -353,10 +357,16 @@ export function buildHtml(snap: CaptureSnapshot, opts: BuildOptions): string {
 	// preview and the share file both inline it: the preview because `app://`
 	// cannot be linked from an iframe, the share file because it must travel as
 	// one document with no sidecar.
+	//
+	// Inlining is the one place where CSS becomes HTML. A literal `</style`
+	// inside the collected CSS (Border's SVG data URIs have 19) would end the
+	// RAWTEXT element early and render every following rule as visible body
+	// text. `embedCss` neutralises those sequences with a CSS escape, so the
+	// stylesheet still applies in full. See src/css/style-boundary.ts.
 	const styleTag =
 		opts.mode === 'export'
 			? '<link rel="stylesheet" href="assets/export.css">'
-			: `<style>\n${opts.cssText}\n</style>`
+			: `<style>\n${embedCss(opts.cssText)}\n</style>`
 
 	const sidenoteRules = room > 0 ? `\n${sidenoteCss(frameWidth)}` : ''
 	// P1c: root state is replayed only where a collected stylesheet can see it.
@@ -388,6 +398,24 @@ ${BODY_END}
 </body>
 </html>
 `
+}
+
+/**
+ * Make collected CSS safe to inline in a `<style>` element.
+ *
+ * CSS escapes are resolved by the CSS parser, so `<\/style` is still `</style`
+ * inside a `url()` value / string / comment — the SVG data URI keeps working —
+ * but the HTML tokenizer no longer sees a style end tag.
+ *
+ * The final assertion is the visible-degradation guard: if any sequence that
+ * could break out of the style element somehow survives, refuse to build the
+ * page instead of quietly emitting a document that shows the theme CSS as
+ * body text and reporting success.
+ */
+function embedCss(css: string): string {
+	const { text, count } = neutralizeStyleEndTags(css)
+	if (count > 0) assertEmbeddableCss(text)
+	return text
 }
 
 /**
