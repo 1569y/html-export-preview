@@ -1,64 +1,52 @@
-# Release Notes — v0.1.1
+# Release Notes — v0.1.2
 
-Maintenance release for the Obsidian plugin review. **No new features** and no
-change to the exported HTML compared with v0.1.0.
+Theme-compatibility patch. **No new features.** This release only fixes how
+theme CSS is embedded in the HTML preview and in exported single-file pages.
 
-## What changed
+## Fixed
 
-- **Fixed the Source Code Error reported by the official Obsidian automated
-  review.** The preview editor applied the selection outline on images,
-  Mermaid diagrams and tables with inline `style.setProperty('outline', ...)`
-  calls. The outline now comes from a `he-media-selected` CSS class defined in
-  the preview's live stylesheet, toggled with standard `classList` add/remove.
-  This rule is editor-only: `responsiveCss()` and `buildHtml()` were not
-  modified, so exported HTML gains no editor styling and is otherwise
-  unchanged.
-- **Restructured the documentation into two languages.** `README.md` is now
-  the English default and contains explicit `Installation` and `How to Use`
-  sections. Installation documents only the two real paths (BRAT with
-  `1569y/html-export-preview`, and manual installation of the three Release
-  assets); it states that the plugin is not yet in the Obsidian community
-  plugin directory. The existing Simplified Chinese edition is preserved as
-  `README.zh-CN.md`, and both editions link to each other at the top.
-  `README.en.md` is now a short redirect stub so old links keep working, and
-  a second copy of the English text is no longer maintained.
-- **Version metadata:** `manifest.json` and `package.json` are `0.1.1`.
-  `minAppVersion` remains `1.15.0`. `versions.json` remains
-  `{"0.1.0": "1.15.0"}` — the official Versions documentation says a new
-  entry is only required when `minAppVersion` changes, so no duplicate
-  `0.1.1` record was added.
+- **Prevent theme CSS containing embedded SVG `<style>` markup from leaking
+  into the HTML preview or exported single-file pages.** HTML parses `<style>`
+  as a RAWTEXT element, so a literal `</style>` inside a theme's inline SVG
+  data URI ended the style block early and every remaining rule was rendered
+  as visible body text. The embedding boundary now writes that sequence as the
+  CSS escape `<\/style>`: the CSS parser restores `/`, while the HTML
+  tokenizer no longer sees a closing tag.
+- **Preserve CSS mask rules while safely embedding theme styles.** Escaping
+  happens only at the embedding boundary. SVG data URIs and `mask-image` /
+  `-webkit-mask-image` rules keep their original meaning, and directory
+  exports still write `assets/export.css` byte-for-byte unchanged because
+  they load CSS through a `<link>` element rather than inline.
+- **Avoid misleading warnings when special CSS has been handled
+  successfully.** A stylesheet that was safely embedded is no longer counted
+  as a CSS warning in the export report. CSS that genuinely cannot be
+  embedded is still refused with an explicit reason instead of producing a
+  page that displays its own stylesheet.
 
-Across the whole `0.1.0`..`0.1.1` range the only changed source file is
-`src/view/preview-view.ts` (+32 / -12). `styles.css` is byte-identical to the
-v0.1.0 asset, the export pipeline is untouched, and `main.js` differs only by
-the selection-outline fix above. No settings, no data migration and no
-user-visible workflow changed.
+## Scope
+
+This is a compatibility patch for themes that embed SVG markup in their CSS.
+It adds no settings, no UI, no data migration and no change to the export
+workflow. It does **not** claim compatibility with every Obsidian theme;
+themes with other unusual CSS constructs may still need individual testing.
+The regression suite added for this fix uses small, self-contained CSS
+samples only; no third-party theme files or user notes are included in the
+repository.
 
 ## Verification
 
-- `tsc -noEmit` passes; `npm test` passes (the full offline unit suite,
-  including the preview lifecycle case covering the CSS-class selection
-  highlight).
-- `npm run build` reproduces the committed `main.js` byte-for-byte; a clean
-  `git archive` source tree rebuilt with the same commands used by GitHub
-  Actions produces an identical bundle.
-- The official pre-review on `fix/obsidian-review-0.1.1` at commit `67aba2b`
-  completed with **Source Code: no Error** and **Dependencies: Pass**. Two
-  README warnings remain even though the English default README contains
-  real `Installation` and `How to Use` sections. They are recorded as a
-  likely scanner false positive; no further README rewrites were made and the
-  bilingual documentation is left intact.
-
-## Known limitations
-
-- Desktop-only (`isDesktopOnly: true`). Requires Obsidian 1.15.0 or later.
-- Export captures the rendered reading view, not raw markdown; some
-  scripted/interactive embeds may not capture perfectly.
-- Not yet listed in the Obsidian community plugin directory. Install with
-  BRAT or manually from the Release assets (see `README.md`).
+- `tsc -noEmit`, the full `npm test` suite (including the CSS boundary
+  regressions) and `npm run build` pass.
+- Two consecutive production builds produce a byte-identical `main.js`, and a
+  clean source tree rebuilt with the same commands used by GitHub Actions
+  reproduces the same bundle.
+- Real-browser DOM checks confirm that the style element is not terminated
+  early, that no CSS appears as body text, and that the mask rules survive
+  with the same computed values and CSSOM rule text as the unescaped
+  stylesheet.
 
 ## Upgrade / downgrade
 
 Replace `main.js`, `manifest.json` and `styles.css` in
 `.obsidian/plugins/html-export-preview/` (keep `data.json`). No data
-migration is performed automatically.
+migration is performed automatically. `minAppVersion` remains `1.15.0`.
