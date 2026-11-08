@@ -72,7 +72,7 @@ const collector = await bundle('src/css/css-collector.ts', 'border-css-collector
 const audit = await bundle('src/export/share-audit.ts', 'border-share-audit')
 const { buildHtml, BODY_START, BODY_END } = exporter
 const { renderCss, collectCss } = collector
-const { countStyleEndTags, neutralizeStyleEndTags, assertEmbeddableCss, styleBoundaryWarning } = boundary
+const { countStyleEndTags, neutralizeStyleEndTags, assertEmbeddableCss } = boundary
 const { auditShareDocument } = audit
 
 /* ------------------------------------------------------------- fixtures -- */
@@ -218,12 +218,11 @@ await check('1.4 assertEmbeddableCss 对残留序列抛错、对已转义通过'
 	assertEmbeddableCss(neutralizeStyleEndTags('</style>').text)
 })
 
-await check('1.5 styleBoundaryWarning 产生可见报告、无风险时返回 null', () => {
-	equal(styleBoundaryWarning([{ text: DEFAULT_CSS }]), null, 'safe theme')
-	const w = styleBoundaryWarning([{ text: MINIMAL_BORDER_CSS }])
-	assert(typeof w === 'string' && w.includes('</style>'), 'warning text visible')
-	assert(w.includes('不会显示为正文'), 'warning states the consequence')
-	equal(styleBoundaryWarning([{ text: MINIMAL_BORDER_CSS }, { text: MINIMAL_BORDER_CSS }]).includes('4 处'), true, 'counts all chunks')
+await check('1.5 成功转义是静默成功，不产生告警也不抛出', () => {
+	const { text, count } = neutralizeStyleEndTags(FULL_BORDER_LIKE)
+	assert(count > 0, 'fixture really carries SVG style end tags')
+	equal(countStyleEndTags(text), 0, 'no residual breakers')
+	assertEmbeddableCss(text) // must not throw
 })
 
 /* -------------------------------------------------- 2. HTML 结构（RAWTEXT） -- */
@@ -343,9 +342,9 @@ await check('3.5 多处连续 </style></style> 不互相吞掉', () => {
 
 /* -------------------------------------------------- 4. 收集器集成与降级 -- */
 
-console.log('\n# 4. collectCss 原始文本回退与可见提示 / 安全降级')
+console.log('\n# 4. 收集器集成：静默成功 / 安全降级')
 
-await check('4.1 cssRules 不可读时走原始文本，收集器保留 CSS 并给出可见警告', async () => {
+await check('4.1 cssRules 不可读时走原始文本，成功转义不产生虚假 CSS 警告', async () => {
 	globalThis.CSSRule = { IMPORT_RULE: 3 }
 	globalThis.document = {
 		styleSheets: [
@@ -360,8 +359,10 @@ await check('4.1 cssRules 不可读时走原始文本，收集器保留 CSS 并�
 	const css = await collectCss({})
 	equal(css.sheets[0].method, 'raw', 'raw-text fallback used')
 	equal(countStyleEndTags(css.chunks[0].text), 2, 'raw CSS keeps its breakers verbatim')
-	const warning = css.warnings.find(w => w.includes('</style>'))
-	assert(typeof warning === 'string' && warning.includes('不会显示为正文'), 'visible warning recorded')
+	// `reportSuccess()` prints warnings.length as "CSS 警告 N 条". A clean,
+	// successfully escaped export must contribute zero to that count.
+	const spurious = css.warnings.filter(w => w.includes('</style>') || w.includes('转义'))
+	equal(spurious.length, 0, 'no false "CSS 警告" for a successful escape')
 	// ...and the embedding boundary still neutralises it.
 	const { html } = (() => {
 		const t = renderCss(css)

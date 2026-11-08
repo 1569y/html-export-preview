@@ -1,6 +1,5 @@
 import type { App } from 'obsidian'
 import type { AssetCollector } from '../assets/resource-manager'
-import { styleBoundaryWarning } from './style-boundary'
 
 /**
  * Collect every stylesheet the app currently has loaded, in cascade order.
@@ -215,13 +214,14 @@ export async function collectCss(
 	}
 
 	const bytes = chunks.reduce((sum, c) => sum + c.text.length, 0)
-	// A raw-text stylesheet (the `cssRules` fallback or an inlined `@import`)
-	// can carry literal `</style>` sequences from SVG data URIs. `buildHtml`
-	// neutralises them at the embedding boundary; record the fact here so the
-	// export report does not claim a completely clean capture while silently
-	// relying on that escape. See style-boundary.ts.
-	const boundaryWarning = styleBoundaryWarning(chunks)
-	if (boundaryWarning) warnings.push(boundaryWarning)
+	// Raw-text stylesheets can carry literal `</style>` sequences from SVG data
+	// URIs. `buildHtml` neutralises them at the embedding boundary. That is a
+	// normal, successful embedding — do NOT record a warning here: the export
+	// report renders `warnings.length` as "CSS 警告 N 条", which would make a
+	// perfectly good export look degraded. Only genuine collection failures
+	// (skipped sheets, unreadable @imports, …) belong in `warnings`; a CSS that
+	// cannot be embedded at all is refused by `assertEmbeddableCss()`.
+	// See src/css/style-boundary.ts.
 	// Fetch app-bundle fonts while Obsidian is still running; a failure is a
 	// warning, not a broken export (the previous `data:,` fallback still applies).
 	//

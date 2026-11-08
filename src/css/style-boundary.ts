@@ -24,6 +24,13 @@
  * by the CSS parser (the SVG data URI is unchanged) while remaining invisible to
  * the HTML tokenizer. This is the same technique used to embed `</script>` in
  * inline JavaScript. It is idempotent: `<\/style` does not match the pattern.
+ *
+ * A successful neutralisation is an ordinary, silent success: it must not add
+ * a `collectCss().warnings` entry, because `reportSuccess()` renders that count
+ * as "CSS 警告 N 条" and a clean export would look degraded. Only a stylesheet
+ * that cannot be embedded is reported — `assertEmbeddableCss()` aborts the
+ * build with an explicit user-facing reason instead of emitting a page that
+ * shows the theme CSS as body text.
  */
 
 /** Fresh regex on purpose — a shared /g regex has stateful `lastIndex`. */
@@ -66,19 +73,3 @@ export function assertEmbeddableCss(css: string): void {
 	}
 }
 
-/**
- * Visible report line for the export summary. A theme carrying these sequences
- * is not an error after neutralisation, but it must not pass silently: the
- * maintainer needs to know a raw-text stylesheet reached the page.
- */
-export function styleBoundaryWarning(
-	chunks: ReadonlyArray<{ text: string; origin?: string }>
-): string | null {
-	let count = 0
-	for (const chunk of chunks) count += countStyleEndTags(chunk.text)
-	if (count === 0) return null
-	return (
-		`收集到的样式表含 ${count} 处 </style> 序列（常见于主题的 SVG data URI）；` +
-		'嵌入 HTML 时已安全转义，主题样式保持完整，不会显示为正文。'
-	)
-}
